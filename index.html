@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<link href="https://fonts.googleapis.com/css?family=Calistoga&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Bangers|Dancing+Script&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Monoton&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Fredericka+the+Great&display=swap" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+	<title>Quiz</title>
+	<link rel="stylesheet" href="style.css">
+	<script src="main.js"></script>
+</head>
+
+<body>
+	<nav class="navbar-inverse" style="position:sticky;top:0;z-index:99999">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand gds" href="/Office/process%20trainings/">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
+		</div>
+		<div class="collapse navbar-collapse" id="myNavbar">
+			<ul id="dropdown-menu" class="nav navbar-nav">
+				<li><a href="/Office/process%20trainings/">Home</a></li>
+				<li><a href="/Office/phonetics/">Phonetics</a></li>
+				<li><a href="/Office/scripts/">Scripts</a></li>
+				<li><a href="/Office/force%20call%20exits/">Force Call Exit Script</a></li>
+				<li><a href="/Office/notes/">Notes</a></li>
+				<li><a href="/Office/dispositions/">Disposition</a></li>
+				<li><a href="/Office/faqs/">FAQs</a></li>
+				<li><a href="/Office/what's%20new/">What's New</a></li>
+				<li><a href="/Office/do's%20n%20dont's/">Do's and Dont's</a></li>
+			</ul>
+		</div>
+	</nav>
+	<h2>Quiz</h2>
+	<div class="quiz-container">
+        <div id="quiz"></div>
+      </div>
+      <button id="previous">Previous Question</button>
+      <button id="next">Next Question</button>
+      <button id="submit">Submit Quiz</button>
+      <div id="results"></div>
+</body>
+<script>
+	(   function()
+{
+    // Functions
+    function buildQuiz(){
+      // variable to store the HTML output
+      const output = [];
+  
+      // for each question...
+      myQuestions.forEach(
+        (currentQuestion, questionNumber) => {
+  
+          // variable to store the list of possible answers
+          const answers = [];
+  
+          // and for each available answer...
+          for(letter in currentQuestion.answers){
+  
+            // ...add an HTML radio button
+            answers.push(
+              `<label>
+                <input type="radio" name="question${questionNumber}" value="${letter}">
+                ${letter} :
+                ${currentQuestion.answers[letter]}
+              </label>`
+            );
+          }
+  
+          // add this question and its answers to the output
+          output.push(
+            `<div class="slide">
+              <div class="question"> ${currentQuestion.question} </div>
+              <div class="answers"> ${answers.join("")} </div>
+            </div>`
+          );
+        }
+      );
+  
+      // finally combine our output list into one string of HTML and put it on the page
+      quizContainer.innerHTML = output.join('');
+    }
+  
+    function showResults(){
+  
+      // gather answer containers from our quiz
+      const answerContainers = quizContainer.querySelectorAll('.answers');
+  
+      // keep track of user's answers
+      let numCorrect = 0;
+  
+      // for each question...
+      myQuestions.forEach( (currentQuestion, questionNumber) => {
+  
+        // find selected answer
+        const answerContainer = answerContainers[questionNumber];
+        const selector = `input[name=question${questionNumber}]:checked`;
+        const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+  
+        // if answer is correct
+        if(userAnswer === currentQuestion.correctAnswer){
+          // add to the number of correct answers
+          numCorrect++;
+  
+          // color the answers green
+          answerContainers[questionNumber].style.color = 'lightgreen';
+        }
+        // if answer is wrong or blank
+        else{
+          // color the answers red
+          answerContainers[questionNumber].style.color = 'red';
+        }
+      });
+  
+      // show number of correct answers out of total
+      resultsContainer.innerHTML = `${numCorrect} out of ${myQuestions.length}`;
+    }
+  
+    function showSlide(n) {
+      slides[currentSlide].classList.remove('active-slide');
+      slides[n].classList.add('active-slide');
+      currentSlide = n;
+      if(currentSlide === 0){
+        previousButton.style.display = 'none';
+      }
+      else{
+        previousButton.style.display = 'inline-block';
+      }
+      if(currentSlide === slides.length-1){
+        nextButton.style.display = 'none';
+        submitButton.style.display = 'inline-block';
+      }
+      else{
+        nextButton.style.display = 'inline-block';
+        submitButton.style.display = 'none';
+      }
+    }
+  
+    function showNextSlide() {
+      showSlide(currentSlide + 1);
+    }
+  
+    function showPreviousSlide() {
+      showSlide(currentSlide - 1);
+    }
+  
+    // Variables
+    const quizContainer = document.getElementById('quiz');
+    const resultsContainer = document.getElementById('results');
+    const submitButton = document.getElementById('submit');
+    const myQuestions = [
+      {
+        question: "You directly reached a voicemail saying “Hi, this is Mike Smith. I do not take calls, however, you can contact me at mike@xyz.com”.",
+        answers: {
+          a: "Voicemail",
+          b: "Direct Number",
+          c: "Do Not Call"
+        },
+        correctAnswer: "b"
+      },
+      {
+        question: "You reached a IVR saying “Namaskar. Aapka XYZ Incorporated main hardik swagat hai. Kripya diye gaye nirdeshon ka palan karein.”",
+        answers: {
+          a: "GK Block-Rem",
+          b: "Not Available",
+          c: "Voicemail"
+        },
+        correctAnswer: "c"
+      },
+      {
+        question: "GK has transferred the call and you get a voicemail saying “If you wish to contact us, please send an email at info@xyz.com “",
+        answers: {
+          a: "GK Block-Rem",
+          b: "Voicemail",
+          c: "Not Available",
+        },
+        correctAnswer: "a"
+      },
+      {
+        question: "You reached a voicemail saying “Hi, this is Robert. Please leave a message after the beep.”",
+        answers: {
+          a: "Voicemail",
+          b: "Direct Number",
+          c: "VM Dropped Active"
+        },
+        correctAnswer: "a"
+      },
+      {
+        question: "If GK says, “Mike does not want to talk to your company.”",
+        answers: {
+          a: "Do Not Call",
+          b: "Not Available",
+          c: "GK Block-Rem"
+        },
+        correctAnswer: "c"
+      },
+      {
+        question: "Called opened with “Hi, this is Mike”, however, pitcher went busy and you had to do a graceful exit.",
+        answers: {
+          a: "Not Available",
+          b: "Pitcher Busy",
+          c: "Voicemail"
+        },
+        correctAnswer: "b"
+      },
+      {
+        question: "GK says “We don’t have anyone by this name” however, confirms that you have reached the right company.",
+        answers: {
+          a: "Not Available",
+          b: "Wrong Number-Rem",
+          c: "Research Error"
+        },
+        correctAnswer: "c"
+      },
+      {
+        question: "GK says “Mike Smith is one of our consultants. I am sorry I have no way to connect to him and neither do I have his alternate number.”",
+        answers: {
+          a: "GK Block-Rem",
+          b: "Research Error",
+          c: "Not Available"
+        },
+        correctAnswer: "b"
+      },
+      {
+        question: "GK has transferred the call and you get a voicemail saying “We don’t accept unsolicited calls.”",
+        answers: {
+          a: "Voicemail",
+          b: "GK Block-Rem",
+          c: "Do Not Call"
+        },
+        correctAnswer: "b"
+      },
+      {
+        question: "GK says, “Mike works in the night shift.”",
+        answers: {
+          a: "GK Block-Rem",
+          b: "Not Available",
+          c: "Research Error"
+        },
+        correctAnswer: "b"
+      },
+      {
+        question: "You directly get to a voicemail saying “Hi, this is Mike Smith. I am no longer working with (correct company name).”",
+        answers: {
+          a: "Direct Number",
+          b: "Person Left-Rem",
+          c: "Voicemail"
+        },
+        correctAnswer: "b"
+      },
+      {
+        question: "GK says “We have 3 employees with the name Mike Smith”, however, we do not have the job title mentioned in our application.",
+        answers: {
+          a: "GK Block-Rem",
+          b: "Incomplete Records",
+          c: "Research Error"
+        },
+        correctAnswer: "b"
+      },
+      {
+        question: "On dialing you hear a message “This number has been disconnected.”",
+        answers: {
+          a: "Voicemail",
+          b: "Do Not Call",
+          c: "Research Error"
+        },
+        correctAnswer: "c"
+      },
+      {
+        question: "GK hung up the phone before you could ask him/her to connect to Mike Smith.",
+        answers: {
+          a: "GK Block-Rem",
+          b: "Not Available",
+          c: "Wrong Number"
+        },
+        correctAnswer: "b"
+      },
+      {
+        question: "In IVR, you have an option for DBN, however, are unable to find Mike Smith in the list. Also you are not able to get to the operator by pressing 0. No previous notes available in the application.",
+        answers: {
+          a: "Research Error",
+          b: "Voicemail",
+          c: "Not Available"
+        },
+        correctAnswer: "b"
+      },
+      {
+        question: "The moment when Mike opened the call, the pitcher went busy and you had to do a graceful exit.",
+        answers: {
+          a: "Pitcher Busy",
+          b: "Not Available",
+          c: "GK Block-Rem"
+        },
+        correctAnswer: "a"
+      },
+      {
+        question: "GK says “Mike Smith is now located in China, I do not have any number for that office.”",
+        answers: {
+          a: "GK Block-Rem",
+          b: "Target in Different Location",
+          c: "Not Available"
+        },
+        correctAnswer: "b"
+      },
+      {
+        question: "GK says “Mike is busy in a meeting, please call after an hour.”",
+        answers: {
+          a: "GK Block-Rem",
+          b: "Do Not Call",
+          c: "Not Available"
+        },
+        correctAnswer: "c"
+      },
+      {
+        question: "GK says “Mike’s department does not take calls. I do not have any other number for him.”",
+        answers: {
+          a: "Do Not Call",
+          b: "GK Block-Rem",
+          c: "Not Available"
+        },
+        correctAnswer: "b"
+      },
+      {
+        question: "GK says “I do not have Mike Smith’s extension or phone number. You can contact him at mike.smith@xyz.com.”",
+        answers: {
+          a: "Do Not Call",
+          b: "GK Block-Rem",
+          c: "Not Available"
+        },
+        correctAnswer: "b"
+      },
+    ];
+  
+    // Kick things off
+    buildQuiz();
+  
+    // Pagination
+    const previousButton = document.getElementById("previous");
+    const nextButton = document.getElementById("next");
+    const slides = document.querySelectorAll(".slide");
+    let currentSlide = 0;
+  
+    // Show the first slide
+    showSlide(currentSlide);
+  
+    // Event listeners
+    submitButton.addEventListener('click', showResults);
+    previousButton.addEventListener("click", showPreviousSlide);
+    nextButton.addEventListener("click", showNextSlide);
+  })();
+  
+</script>
+</html>
