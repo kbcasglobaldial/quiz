@@ -16,6 +16,12 @@ h1 {
   background-color: #444;
   color: #fff;
 }
+#heading {
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bolder;
+    background-color: #F5F5F5;
+}
 .question {
   font-size: 30px;
   margin-bottom: 10px;
