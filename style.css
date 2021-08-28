@@ -76,6 +76,7 @@ button:hover {
 }
 
 h2 {
+    margin-top: 20px;
     display: inline;
     text-align: center;
     background-color: #F5F5F5;
